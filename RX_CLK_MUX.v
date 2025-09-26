@@ -1,6 +1,6 @@
 module RX_CLK_MUX(
     input [5:0] Prescale,
-    output reg [3:0] RX_div_ratio
+    output reg [7:0] RX_div_ratio
 );
 
 always @(*) begin

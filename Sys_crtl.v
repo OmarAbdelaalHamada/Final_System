@@ -1,5 +1,7 @@
 module Sys_crtl #(
     parameter FRAME_WIDTH = 8,
+    parameter FIFO_DEPTH = 8,
+    parameter FIFO_ADDR_WIDTH = $clog2(FIFO_DEPTH),
     parameter ALU_DATA_WIDTH = 16,
     parameter ALU_FUNC_WIDTH = 4,
     parameter REG_FILE_DEPTH = 16,
@@ -25,7 +27,7 @@ module Sys_crtl #(
     output reg RdEn,
     output reg [FRAME_WIDTH-1:0] WrData,
     output reg clk_div_en,
-    output reg WR_INC
+    output reg [FIFO_ADDR_WIDTH-1:0] WR_INC
 );
 
 // State Encoding
@@ -133,6 +135,7 @@ always @(*) begin
     RdEn       = 0;
     WrData     = 0; 
     clk_div_en = 0; 
+    WR_INC     = 0;
     case (current_state)
         IDLE: begin
             ALU_FUNC   = 0;
@@ -208,6 +211,7 @@ always @(*) begin
             RdEn       = 0;
             WrData     = 0;
             clk_div_en = 1;
+            WR_INC     = 0;
         end
     endcase
 end

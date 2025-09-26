@@ -50,7 +50,18 @@ module sys_tb();
         Initial_values();
         apply_reset();
         // Add stimulus here as needed
+        feed_input(8'hAA); // write operation
+        feed_input(8'h00); // addr 0x00 => Reg0 => OP_A
+        feed_input(8'h02); // We write value 2 in Reg0
 
+        feed_input(8'hAA); // write operation
+        feed_input(8'h01); // addr 0x00 => Reg1 => OP_B
+        feed_input(8'h03); // We write value 3 in Reg1
+        
+        feed_input(8'hAA); // Read operation
+        feed_input(8'h00); // addr 0x00 => Reg0 => OP_A
+
+        check_TX_out_parity(8'h02);
         $finish;
     end
 
@@ -60,7 +71,7 @@ module sys_tb();
     task apply_reset;
         begin
             RST = 0;
-            #(REF_CLK_PERIOD);
+            #(4*REF_CLK_PERIOD);
             RST = 1;
             #(REF_CLK_PERIOD);
         end
@@ -74,7 +85,68 @@ module sys_tb();
     endtask
 
     //feeding input tasks:
-    
+    task feed_input;
+        integer i;
+        input [7:0] data;
+        begin
+            data = $random; // Example data pattern
+            RX_IN = 0;// start bit
+            #(UART_CLK_PERIOD);
+
+            for (i = 0; i < 8; i = i + 1) begin
+                RX_IN = data[i];
+                #(UART_CLK_PERIOD);
+            end
+            if((DUT.Reg_file_inst.registers[2][0])) begin
+                if(DUT.Reg_file_inst.registers[2][1]) begin
+                    RX_IN = ~^data; // Odd parity bit
+                    #(UART_CLK_PERIOD);
+                end 
+                else begin
+                    RX_IN = ^data; // Even parity bit
+                    #(UART_CLK_PERIOD);
+                end
+            end
+            RX_IN = 1; // Stop bit
+            #(UART_CLK_PERIOD);
+        end
+    endtask
+
+
+
+    // Task to check TX_out serialization and parity
+    task check_TX_out_parity;
+        integer i;
+        input [7:0] P_DATA; //FIFO Output
+        reg [10:0] expected_data;
+        reg [10:0] test_data; // Test data for serialization
+        begin
+            // Wait for start bit (assume idle is high, start is low)
+            //wait (TX_out_tb == 0);
+            // Sample all 11 bits (start, 8 data, parity, stop)
+            for (i = 0; i < 11; i = i + 1) begin
+                test_data[i] = TX_OUT;
+                #(UART_CLK_PERIOD*(DUT.Reg_file_inst.registers[2][7:2]));
+            end
+            // Build expected data: {stop, parity, data, start}
+            expected_data = {1'b1, ((DUT.Reg_file_inst.registers[2][0]) ? (DUT.UART_inst.u_UART_TX.parity_calc_inst.parity_bit) : 1'bx), P_DATA, 1'b0};
+            if (DUT.Reg_file_inst.registers[2][0]) begin
+                if (test_data !== expected_data) begin
+                    $display("TX_out mismatch: expected %b, got %b", expected_data, test_data);
+                end else begin
+                    $display("TX_out matches expected data with parity.");
+                end
+            end 
+            else begin
+                // If parity is disabled, ignore parity bit in comparison
+                if ({test_data[9:0]} !== {1'b1, P_DATA, 1'b0}) begin
+                    $display("TX_out mismatch (no parity): expected %b, got %b", {1'b1, P_DATA, 1'b0}, {test_data[9:0]});
+                end else begin
+                    $display("TX_out matches expected data (no parity).");
+                end
+            end
+        end
+    endtask
 //=========================================Clock Generation=======================================//
     // Ref Clock Generation
     initial begin

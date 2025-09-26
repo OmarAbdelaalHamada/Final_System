@@ -33,7 +33,7 @@ UART_TX u_UART_TX(
 UART_RX u_UART_RX(
     .clk(RX_CLK),
     .rst_n(rst_n),
-    .RX_in(RX_IN_S),
+    .RX_IN(RX_IN_S),
     .P_DATA(RX_OUT_P),
     .par_err(par_err),
     .stp_err(stp_err),

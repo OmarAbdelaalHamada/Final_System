@@ -16,7 +16,6 @@ MUX.v
 parity_calc.v
 parity_check.v
 PULSE_GEN.v
-README.md
 Reg_file.v
 rst_sync.v
 RX_CLK_MUX.v
@@ -28,3 +27,4 @@ UART_TX.v
 UART.v
 Sys_crtl.v
 Sys_top.v
+sys_tb.v

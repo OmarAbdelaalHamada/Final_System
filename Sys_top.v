@@ -1,10 +1,12 @@
-module Sys_top#()(
+module Sys_top#(
     // Parameters
     parameter FRAME_WIDTH = 8,
     parameter ALU_DATA_WIDTH = 16,
     parameter ALU_FUNC_WIDTH = 4,
     parameter REG_FILE_DEPTH = 16,
-    parameter REG_FILE_ADDR_WIDTH = $clog2(REG_FILE_DEPTH)
+    parameter REG_FILE_ADDR_WIDTH = $clog2(REG_FILE_DEPTH),
+    parameter FIFO_DEPTH = 8,
+    parameter FIFO_ADDR_WIDTH = $clog2(FIFO_DEPTH)
 )(
     // Inputs
     input CLK,
@@ -24,7 +26,7 @@ module Sys_top#()(
     wire TX_IN_V;
     wire rst_uart_domain;
     wire rinc;
-    wire [3:0] RX_div_ratio;
+    wire [7:0] RX_div_ratio;
     wire busy;
     wire RX_CLK;
     wire TX_CLK;
@@ -41,16 +43,16 @@ module Sys_top#()(
     wire ALU_EN;
     wire CLK_EN_GATE;
     wire clk_div_en;
-    wire WR_INC;
+    wire [FIFO_ADDR_WIDTH-1:0] WR_INC;
     wire RX_P_VLD;
     wire [FRAME_WIDTH-1:0] RX_P_DATA;
     wire FIFO_FULL;
     wire FIFO_EMPTY;
     wire ALU_CLK;
-    wire Reg0;
-    wire Reg1;
-    wire Reg2;
-    wire Reg3;
+    wire [FRAME_WIDTH-1:0] Reg0;
+    wire [FRAME_WIDTH-1:0] Reg1;
+    wire [FRAME_WIDTH-1:0] Reg2;
+    wire [FRAME_WIDTH-1:0] Reg3;
     wire [FRAME_WIDTH-1:0] RX_Out_to_Ctrl;
     wire RX_Valid_to_Ctrl;
 
@@ -60,13 +62,13 @@ module Sys_top#()(
 
     //reference clock domain: 
 
-    Sys_crtl Sys_crtl_inst #(
+    Sys_crtl  #(
         .FRAME_WIDTH(FRAME_WIDTH),
         .ALU_DATA_WIDTH(ALU_DATA_WIDTH),
         .ALU_FUNC_WIDTH(ALU_FUNC_WIDTH),
         .REG_FILE_DEPTH(REG_FILE_DEPTH),
         .REG_FILE_ADDR_WIDTH(REG_FILE_ADDR_WIDTH)
-    )(
+    ) Sys_crtl_inst (
         .CLK(CLK),
         .RST(rst_ref_domain),
         .ALU_OUT(ALU_OUT),
@@ -120,9 +122,9 @@ module Sys_top#()(
     );
 
     CLK_GATE clk_gate_inst (
-        .CLK_IN(CLK),
-        .EN(CLK_EN_GATE),
-        .CLK_OUT(ALU_CLK)
+        .CLK(CLK),
+        .CLK_EN(CLK_EN_GATE),
+        .GATED_CLK(ALU_CLK)
     );
 
     rst_sync #(
@@ -140,19 +142,19 @@ module Sys_top#()(
         .RX_div_ratio(RX_div_ratio)
     );
 
-    clk_div clk_div_RX (
+    Int_clk_div clk_div_RX (
         .I_ref_clk(UART_CLK),
         .I_rst_n(rst_uart_domain),
-        .I_clk_en(clk_div_en), // Always enable TX clock
-        .I_div_ratio(RX_div_ratio), // Unused
+        .I_clk_en(clk_div_en), // Always enable RX clock
+        .I_div_ratio(RX_div_ratio), 
         .o_div_clk(RX_CLK)
     );
 
-    clk_div clk_div_TX (
+    Int_clk_div clk_div_TX (
         .I_ref_clk(UART_CLK),
         .I_rst_n(rst_uart_domain),
         .I_clk_en(clk_div_en), // Always enable TX clock
-        .I_div_ratio(Reg3), // Unused
+        .I_div_ratio(Reg3), 
         .o_div_clk(TX_CLK)
     );
 
@@ -178,15 +180,15 @@ module Sys_top#()(
     pulse_gen pulse_gen_inst (
         .clk(TX_CLK),
         .rst_n(rst_uart_domain),
-        .in_signal(busy),
-        .out_pulse(rinc)
+        .lvl_sig(busy),
+        .pulse_sig(rinc)
     );
 
 
     ASYNC_FIFO#(
-        parameter DATA_WIDTH = 8,
-        parameter FIFO_DEPTH = 8,
-        parameter ADDR_WIDTH = $clog2(FIFO_DEPTH)
+        .DATA_WIDTH(8),
+        .FIFO_DEPTH(FIFO_DEPTH),
+        .ADDR_WIDTH(FIFO_ADDR_WIDTH)
     ) FIFO_inst (
         .w_clk(CLK),
         .w_rst_n(rst_ref_domain),
@@ -201,9 +203,9 @@ module Sys_top#()(
     );
     
 
-    data_sync#(
-        parameter BUS_WIDTH = FRAME_WIDTH,
-        parameter NUM_STAGES = 2
+    data_sync #(
+         .BUS_WIDTH(FRAME_WIDTH),
+         .NUM_STAGES(2)
     ) Data_sync_inst (
         .clk(CLK),
         .rst_n(rst_ref_domain),
