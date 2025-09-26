@@ -51,22 +51,13 @@ module sys_tb();
         apply_reset();
         // Add stimulus here as needed
         feed_input(8'hAA); // write operation
-        #(UART_CLK_PERIOD);
-        #(UART_CLK_PERIOD);
         feed_input(8'h00); // addr 0x00 => Reg0 => OP_A
-        #(UART_CLK_PERIOD);
-        #(UART_CLK_PERIOD);
-
         feed_input(8'h02); // We write value 2 in Reg0
-        #(UART_CLK_PERIOD);
-        #(UART_CLK_PERIOD);
         feed_input(8'hAA); // write operation
         feed_input(8'h01); // addr 0x00 => Reg1 => OP_B
         feed_input(8'h03); // We write value 3 in Reg1
-        
-        feed_input(8'hAA); // Read operation
+        feed_input(8'hBB); // Read operation
         feed_input(8'h00); // addr 0x00 => Reg0 => OP_A
-
         check_TX_out_parity(8'h02);
         $finish;
     end
@@ -77,7 +68,7 @@ module sys_tb();
     task apply_reset;
         begin
             RST = 0;
-            #(4*REF_CLK_PERIOD);
+            #(REF_CLK_PERIOD);
             RST = 1;
             #(REF_CLK_PERIOD);
         end
@@ -95,26 +86,25 @@ module sys_tb();
         integer i;
         input [7:0] data;
         begin
-            data = $random; // Example data pattern
             RX_IN = 0;// start bit
-            #(UART_CLK_PERIOD);
+            #(UART_CLK_PERIOD*32);
 
             for (i = 0; i < 8; i = i + 1) begin
                 RX_IN = data[i];
-                #(UART_CLK_PERIOD);
+                #(UART_CLK_PERIOD*32);
             end
             if((DUT.Reg_file_inst.registers[2][0])) begin
                 if(DUT.Reg_file_inst.registers[2][1]) begin
                     RX_IN = ~^data; // Odd parity bit
-                    #(UART_CLK_PERIOD);
+                    #(UART_CLK_PERIOD*32);
                 end 
                 else begin
                     RX_IN = ^data; // Even parity bit
-                    #(UART_CLK_PERIOD);
+                    #(UART_CLK_PERIOD*32);
                 end
             end
             RX_IN = 1; // Stop bit
-            #(UART_CLK_PERIOD);
+            #(UART_CLK_PERIOD*32);
         end
     endtask
 

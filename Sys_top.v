@@ -166,7 +166,7 @@ module Sys_top#(
         .PAR_TYP(Reg2[1]),
         .TX_IN_P(TX_IN_from_fifo),
         .TX_IN_V(TX_IN_V),
-        .Prescale(Reg3[7:2]),
+        .Prescale(Reg2[7:2]),
         .RX_IN_S(RX_IN),
         .TX_OUT_S(TX_OUT),
         .TX_OUT_V(busy), 

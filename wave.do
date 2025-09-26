@@ -43,14 +43,8 @@ add wave -noupdate /sys_tb/DUT/RX_Out_to_Ctrl
 add wave -noupdate /sys_tb/DUT/Sys_crtl_inst/current_state
 add wave -noupdate /sys_tb/DUT/Sys_crtl_inst/next_state
 add wave -noupdate /sys_tb/DUT/RX_Valid_to_Ctrl
-add wave -noupdate /sys_tb/DUT/UART_inst/u_UART_RX/u_fsm/current_state
-add wave -noupdate /sys_tb/DUT/UART_inst/u_UART_RX/u_fsm/next_state
-add wave -noupdate /sys_tb/DUT/UART_inst/u_UART_RX/u_fsm/data_valid
-add wave -noupdate /sys_tb/DUT/UART_inst/u_UART_RX/u_edge_bit_counter/edge_cnt
-add wave -noupdate /sys_tb/DUT/UART_inst/u_UART_RX/u_fsm/prescale
-add wave -noupdate /sys_tb/DUT/UART_inst/u_UART_RX/u_fsm/enable
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {987970 ps} 0}
+WaveRestoreCursors {{Cursor 1} {5819642 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 150
 configure wave -valuecolwidth 100
@@ -66,4 +60,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ps
 update
-WaveRestoreZoom {967685 ps} {1159668 ps}
+WaveRestoreZoom {0 ps} {33285 ns}
