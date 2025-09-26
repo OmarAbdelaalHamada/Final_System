@@ -9,9 +9,9 @@ module Reg_file#(parameter DATA_WIDTH = 8,
     input [DATA_WIDTH-1:0] WrData,
     output reg [DATA_WIDTH-1:0] RdData,
     output reg RdData_valid,
-    output [DATA_WIDTH-1:0] Reg0 // Output for register 0
-    output [DATA_WIDTH-1:0] Reg1 // Output for register 1
-    output [DATA_WIDTH-1:0] Reg2 // Output for register 2
+    output [DATA_WIDTH-1:0] Reg0, // Output for register 0
+    output [DATA_WIDTH-1:0] Reg1, // Output for register 1
+    output [DATA_WIDTH-1:0] Reg2, // Output for register 2
     output [DATA_WIDTH-1:0] Reg3 // Output for register 3
 );
 integer i = 0;
