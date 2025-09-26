@@ -27,7 +27,7 @@ module Sys_crtl #(
     output reg RdEn,
     output reg [FRAME_WIDTH-1:0] WrData,
     output reg clk_div_en,
-    output reg [FIFO_ADDR_WIDTH-1:0] WR_INC
+    output reg WR_INC
 );
 
 // State Encoding
@@ -154,7 +154,7 @@ always @(*) begin
             RdEn   = 1;
             if(!FIFO_FULL && RdData_Valid) begin
                 WrData = RdData;
-                WR_INC = WR_INC + 1;
+                WR_INC = 1;
            end
         end
         Wr_Addr: begin
@@ -188,13 +188,13 @@ always @(*) begin
             ALU_OUT_reg = ALU_OUT;
             if(OUT_VALID && !FIFO_FULL) begin
                 WrData  = ALU_OUT_reg[FRAME_WIDTH-1:0];
-                WR_INC = WR_INC + 1;
+                WR_INC = 1;
             end
         end
         OUT_to_FIFO_2: begin
             if(!FIFO_FULL) begin
                 WrData  = ALU_OUT_reg[2*FRAME_WIDTH-1:FRAME_WIDTH];
-                WR_INC = WR_INC + 1;
+                WR_INC = 1;
             end
         end
         ALU_NOP_FUNC: begin

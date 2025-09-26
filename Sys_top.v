@@ -43,7 +43,7 @@ module Sys_top#(
     wire ALU_EN;
     wire CLK_EN_GATE;
     wire clk_div_en;
-    wire [FIFO_ADDR_WIDTH-1:0] WR_INC;
+    wire WR_INC;
     wire RX_P_VLD;
     wire [FRAME_WIDTH-1:0] RX_P_DATA;
     wire FIFO_FULL;

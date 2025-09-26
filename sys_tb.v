@@ -51,9 +51,15 @@ module sys_tb();
         apply_reset();
         // Add stimulus here as needed
         feed_input(8'hAA); // write operation
+        #(UART_CLK_PERIOD);
+        #(UART_CLK_PERIOD);
         feed_input(8'h00); // addr 0x00 => Reg0 => OP_A
-        feed_input(8'h02); // We write value 2 in Reg0
+        #(UART_CLK_PERIOD);
+        #(UART_CLK_PERIOD);
 
+        feed_input(8'h02); // We write value 2 in Reg0
+        #(UART_CLK_PERIOD);
+        #(UART_CLK_PERIOD);
         feed_input(8'hAA); // write operation
         feed_input(8'h01); // addr 0x00 => Reg1 => OP_B
         feed_input(8'h03); // We write value 3 in Reg1
