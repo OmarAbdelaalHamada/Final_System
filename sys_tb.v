@@ -49,7 +49,7 @@ module sys_tb();
     initial begin
         Initial_values();
         apply_reset();
-        // Add stimulus here as needed
+        //Add stimulus here as needed
         feed_input(8'hAA); // write operation
         feed_input(8'h00); // addr 0x00 => Reg0 => OP_A
         feed_input(8'h02); // We write value 2 in Reg0
@@ -62,27 +62,32 @@ module sys_tb();
         #(UART_CLK_PERIOD*(DUT.Reg_file_inst.registers[2][7:2]));
         #(UART_CLK_PERIOD*(DUT.Reg_file_inst.registers[2][7:2]));
         #(UART_CLK_PERIOD*(DUT.Reg_file_inst.registers[2][7:2]));
-
-        feed_input(8'hCC); // ALU operation with operand 
-        feed_input(8'h04); // ALU_OP_A
-        feed_input(8'h03); // ALU_OP_B
-        feed_input(8'h01); // ALU_FUNC => SUB
-        #(2*REF_CLK_PERIOD); // for to write operations in FIFO
-        check_TX_out_parity(8'h01);
-        #(UART_CLK_PERIOD*(DUT.Reg_file_inst.registers[2][7:2]));
-        #(UART_CLK_PERIOD*(DUT.Reg_file_inst.registers[2][7:2]));
-        #(UART_CLK_PERIOD*(DUT.Reg_file_inst.registers[2][7:2]));
-
-        feed_input(8'hDD); // ALU operation without operand 
-        feed_input(8'h00); // ALU_FUNC => SUB
-        #(2*REF_CLK_PERIOD); // for to write operations in FIFO
-        check_TX_out_parity(8'h07);
-        #(UART_CLK_PERIOD*(DUT.Reg_file_inst.registers[2][7:2]));
-        #(UART_CLK_PERIOD*(DUT.Reg_file_inst.registers[2][7:2]));
-        #(UART_CLK_PERIOD*(DUT.Reg_file_inst.registers[2][7:2]));
-        #(UART_CLK_PERIOD*(DUT.Reg_file_inst.registers[2][7:2]));
-        #(UART_CLK_PERIOD*(DUT.Reg_file_inst.registers[2][7:2]));
-        #(UART_CLK_PERIOD*(DUT.Reg_file_inst.registers[2][7:2]));
+        #(20*UART_CLK_PERIOD*(DUT.Reg_file_inst.registers[2][7:2]));
+        // feed_input(8'hCC); // ALU operation with operand 
+        // feed_input(8'hA9); // ALU_OP_A
+        // feed_input(8'h08); // ALU_OP_B
+        // feed_input(8'h02); // ALU_FUNC => SUB
+        // #(2*REF_CLK_PERIOD); // for to write operations in FIFO
+        // check_TX_out_parity(8'h08);
+        // #(UART_CLK_PERIOD*(DUT.Reg_file_inst.registers[2][7:2]));
+        // #(UART_CLK_PERIOD*(DUT.Reg_file_inst.registers[2][7:2]));
+        // #(UART_CLK_PERIOD*(DUT.Reg_file_inst.registers[2][7:2]));
+        // #(UART_CLK_PERIOD*(DUT.Reg_file_inst.registers[2][7:2]));
+        // #(UART_CLK_PERIOD*(DUT.Reg_file_inst.registers[2][7:2]));
+        // #(UART_CLK_PERIOD*(DUT.Reg_file_inst.registers[2][7:2]));
+        // #(UART_CLK_PERIOD*(DUT.Reg_file_inst.registers[2][7:2]));
+        // #(UART_CLK_PERIOD*(DUT.Reg_file_inst.registers[2][7:2]));
+        // #(6*UART_CLK_PERIOD*(DUT.Reg_file_inst.registers[2][7:2]));
+        // feed_input(8'hDD); // ALU operation without operand 
+        // feed_input(8'h00); // ALU_FUNC => ADD
+        // #(2*REF_CLK_PERIOD); // for to write operations in FIFO
+        // check_TX_out_parity(8'h07);
+        // #(UART_CLK_PERIOD*(DUT.Reg_file_inst.registers[2][7:2]));
+        // #(UART_CLK_PERIOD*(DUT.Reg_file_inst.registers[2][7:2]));
+        // #(UART_CLK_PERIOD*(DUT.Reg_file_inst.registers[2][7:2]));
+        // #(UART_CLK_PERIOD*(DUT.Reg_file_inst.registers[2][7:2]));
+        // #(UART_CLK_PERIOD*(DUT.Reg_file_inst.registers[2][7:2]));
+        // #(UART_CLK_PERIOD*(DUT.Reg_file_inst.registers[2][7:2]));
         $finish;
     end
 

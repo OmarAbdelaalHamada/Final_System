@@ -48,11 +48,20 @@ module Sys_crtl #(
 // Internal Signals
     reg [3:0] current_state, next_state;
     reg [ALU_DATA_WIDTH-1:0] ALU_OUT_reg;
-    reg [ALU_FUNC_WIDTH-1:0] ALU_FUNC_reg;
     reg [REG_FILE_ADDR_WIDTH-1:0] RF_ADDR_reg;
     reg [FRAME_WIDTH-1:0] WrData_reg;
 
+// Internal regs:
+// always@(posedge CLK or negedge RST) begin
+//     if(!RST) begin
+//             ALU_OUT_reg <= 0;
+//             RF_ADDR_reg <= 0;
+//             WrData_reg <= 0;
+//     end
+//     else begin
 
+//     end
+// end
 // State Transition
 always @(posedge CLK or negedge RST) begin
     if (!RST) begin
@@ -201,7 +210,7 @@ always @(*) begin
                 end
             end
             else begin
-                next_state = OUT_to_FIFO_2;
+                next_state = IDLE;
             end
         end
         ALU_NOP_FUNC: begin
@@ -280,16 +289,15 @@ always @(*) begin
         ALU_OP_FUNC: begin
             ALU_EN = 1;
             CLK_EN = 1;
-            ALU_FUNC_reg = RX_P_DATA[ALU_FUNC_WIDTH-1:0];
+            ALU_FUNC = RX_P_DATA[ALU_FUNC_WIDTH-1:0];
             clk_div_en = 1;
         end
         OUT_to_FIFO_1: begin
             ALU_EN = 1;
             CLK_EN = 1;
-            ALU_FUNC = ALU_FUNC_reg;
             clk_div_en = 1;
             ALU_OUT_reg = ALU_OUT;
-            if(OUT_VALID && !FIFO_FULL  ) begin
+            if(OUT_VALID && !FIFO_FULL) begin
                 WrData  = ALU_OUT_reg[FRAME_WIDTH-1:0];
                 WR_INC = 1;
             end
@@ -305,7 +313,7 @@ always @(*) begin
             clk_div_en = 1;
             ALU_EN = 1;
             CLK_EN = 1;
-            ALU_FUNC_reg = RX_P_DATA[ALU_FUNC_WIDTH-1:0];
+            ALU_FUNC = RX_P_DATA[ALU_FUNC_WIDTH-1:0];
         end
         default: begin
             ALU_FUNC   = 0;

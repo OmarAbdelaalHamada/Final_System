@@ -55,6 +55,7 @@ module Sys_top#(
     wire [FRAME_WIDTH-1:0] Reg3;
     wire [FRAME_WIDTH-1:0] RX_Out_to_Ctrl;
     wire RX_Valid_to_Ctrl;
+    
 
     assign TX_IN_V = (!FIFO_EMPTY);
 
@@ -214,7 +215,6 @@ module Sys_top#(
         .sync_bus(RX_Out_to_Ctrl),
         .enable_pulse(RX_Valid_to_Ctrl)
     );
-
 
 
 
