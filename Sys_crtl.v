@@ -48,6 +48,7 @@ module Sys_crtl #(
 // Internal Signals
     reg [3:0] current_state, next_state;
     reg [ALU_DATA_WIDTH-1:0] ALU_OUT_reg;
+    reg [ALU_FUNC_WIDTH-1:0] ALU_FUNC_reg;
     reg [REG_FILE_ADDR_WIDTH-1:0] RF_ADDR_reg;
     reg [FRAME_WIDTH-1:0] WrData_reg;
 
@@ -87,37 +88,129 @@ always @(*) begin
             end
         end
         Rd_Addr: begin
-            next_state = Rd_Data;
+            if(RX_P_VLD) begin
+                next_state = Rd_Data;
+            end
+            else begin
+                next_state = Rd_Addr;
+            end
         end
         Rd_Data: begin
-            next_state = IDLE;
+            if(RX_P_VLD) begin
+                if(RX_P_DATA == 8'hAA) begin 
+                    next_state = Wr_Addr;
+                end 
+                else if(RX_P_DATA == 8'hBB) begin 
+                    next_state = Rd_Addr; 
+                end
+                else if (RX_P_DATA == 8'hCC) begin 
+                    next_state = ALU_OP_A; 
+                end
+                else if (RX_P_DATA == 8'hDD) begin
+                    next_state = ALU_NOP_FUNC;
+                end
+                else begin
+                    next_state = IDLE;
+                end
+            end
+            else begin
+                next_state = Rd_Data;
+            end
         end
         Wr_Addr: begin
-            next_state = Wr_Data;
+            if(RX_P_VLD) begin
+                next_state = Wr_Data;
+            end
+            else begin
+                next_state = Wr_Addr;
+            end
         end
         Wr_Data: begin
-            next_state = Wr_to_RF;
+            if(RX_P_VLD) begin
+                next_state = Wr_to_RF;
+            end
+            else begin
+                next_state = Wr_Data;
+            end
         end
         Wr_to_RF: begin
-            next_state = IDLE;
+            if(RX_P_VLD) begin
+                if(RX_P_DATA == 8'hAA) begin 
+                    next_state = Wr_Addr;
+                end 
+                else if(RX_P_DATA == 8'hBB) begin 
+                    next_state = Rd_Addr; 
+                end
+                else if (RX_P_DATA == 8'hCC) begin 
+                    next_state = ALU_OP_A; 
+                end
+                else if (RX_P_DATA == 8'hDD) begin
+                    next_state = ALU_NOP_FUNC;
+                end
+                else begin
+                    next_state = IDLE;
+                end
+            end
+            else begin
+                next_state = Wr_to_RF;
+            end
         end
         ALU_OP_A: begin
-            next_state = ALU_OP_B;
+            if(RX_P_VLD) begin
+                next_state = ALU_OP_B;
+            end
+            else begin
+                next_state = ALU_OP_A;
+            end
         end
         ALU_OP_B: begin
-            next_state = ALU_OP_FUNC;
+            if(RX_P_VLD) begin
+                next_state = ALU_OP_FUNC;
+            end
+            else begin
+                next_state = ALU_OP_B;
+            end
         end
         ALU_OP_FUNC: begin
-            next_state = OUT_to_FIFO_1;
+            if(RX_P_VLD) begin
+                next_state = OUT_to_FIFO_1;
+            end
+            else begin
+                next_state = ALU_OP_FUNC;
+            end
         end
         OUT_to_FIFO_1: begin
-            next_state = OUT_to_FIFO_2;
+                next_state = OUT_to_FIFO_2;
         end
         OUT_to_FIFO_2: begin
-            next_state = IDLE;
+            if(RX_P_VLD) begin
+                if(RX_P_DATA == 8'hAA) begin 
+                    next_state = Wr_Addr;
+                end 
+                else if(RX_P_DATA == 8'hBB) begin 
+                    next_state = Rd_Addr; 
+                end
+                else if (RX_P_DATA == 8'hCC) begin 
+                    next_state = ALU_OP_A; 
+                end
+                else if (RX_P_DATA == 8'hDD) begin
+                    next_state = ALU_NOP_FUNC;
+                end
+                else begin
+                    next_state = IDLE;
+                end
+            end
+            else begin
+                next_state = OUT_to_FIFO_2;
+            end
         end
         ALU_NOP_FUNC: begin
-            next_state = OUT_to_FIFO_1;
+            if(RX_P_VLD) begin
+                next_state = OUT_to_FIFO_1;
+            end
+            else begin
+                next_state = ALU_NOP_FUNC;
+            end
         end
         default: begin
             next_state = IDLE;
@@ -134,7 +227,7 @@ always @(*) begin
     WrEn       = 0; 
     RdEn       = 0;
     WrData     = 0; 
-    clk_div_en = 0; 
+    clk_div_en = 1; 
     WR_INC     = 0;
     case (current_state)
         IDLE: begin
@@ -152,6 +245,7 @@ always @(*) begin
         end
         Rd_Data: begin
             RdEn   = 1;
+            clk_div_en = 1;
             if(!FIFO_FULL && RdData_Valid) begin
                 WrData = RdData;
                 WR_INC = 1;
@@ -159,48 +253,59 @@ always @(*) begin
         end
         Wr_Addr: begin
             RF_ADDR_reg = RX_P_DATA;
+            clk_div_en = 1;
         end
         Wr_Data: begin
-            RF_ADDR = RF_ADDR_reg;
             WrData_reg = RX_P_DATA;
+            clk_div_en = 1;
         end
         Wr_to_RF: begin
             WrEn = 1;
+            RF_ADDR = RF_ADDR_reg;
             WrData = WrData_reg;
+            clk_div_en = 1;
         end
         ALU_OP_A: begin
             WrEn = 1;
             RF_ADDR = 0;
             WrData = RX_P_DATA;
+            clk_div_en = 1;
         end
         ALU_OP_B: begin
             WrEn = 1;
             RF_ADDR = 1;
             WrData = RX_P_DATA;
+            clk_div_en = 1;
         end
         ALU_OP_FUNC: begin
             ALU_EN = 1;
             CLK_EN = 1;
-            ALU_FUNC = RX_P_DATA[ALU_FUNC_WIDTH-1:0];
+            ALU_FUNC_reg = RX_P_DATA[ALU_FUNC_WIDTH-1:0];
+            clk_div_en = 1;
         end
         OUT_to_FIFO_1: begin
+            ALU_EN = 1;
             CLK_EN = 1;
+            ALU_FUNC = ALU_FUNC_reg;
+            clk_div_en = 1;
             ALU_OUT_reg = ALU_OUT;
-            if(OUT_VALID && !FIFO_FULL) begin
+            if(OUT_VALID && !FIFO_FULL  ) begin
                 WrData  = ALU_OUT_reg[FRAME_WIDTH-1:0];
                 WR_INC = 1;
             end
         end
         OUT_to_FIFO_2: begin
+            clk_div_en = 1;
             if(!FIFO_FULL) begin
                 WrData  = ALU_OUT_reg[2*FRAME_WIDTH-1:FRAME_WIDTH];
                 WR_INC = 1;
             end
         end
         ALU_NOP_FUNC: begin
+            clk_div_en = 1;
             ALU_EN = 1;
             CLK_EN = 1;
-            ALU_FUNC = RX_P_DATA[ALU_FUNC_WIDTH-1:0];
+            ALU_FUNC_reg = RX_P_DATA[ALU_FUNC_WIDTH-1:0];
         end
         default: begin
             ALU_FUNC   = 0;

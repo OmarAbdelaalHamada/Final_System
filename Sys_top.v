@@ -101,21 +101,21 @@ module Sys_top#(
         .WrData(WrData),
         .RdData(RdData),
         .RdData_valid(RdData_Valid),
-        .Reg0(Reg0), // Unused
-        .Reg1(Reg1), // Unused
-        .Reg2(Reg2), // Unused
-        .Reg3(Reg3)  // Unused
+        .Reg0(Reg0), 
+        .Reg1(Reg1), 
+        .Reg2(Reg2), 
+        .Reg3(Reg3)  
     );
 
     ALU #(
-        .DATA_WIDTH(ALU_DATA_WIDTH),
+        .DATA_WIDTH(FRAME_WIDTH),
         .FUNC_WIDTH(ALU_FUNC_WIDTH)
     ) ALU_inst (
         .CLK(ALU_CLK),
         .RST(rst_ref_domain),
         .Enable(ALU_EN),
-        .A(Reg0), // Zero-extend to 16 bits
-        .B(Reg1), // Zero-extend to 16 bits
+        .A(Reg0), 
+        .B(Reg1), 
         .ALU_FUN(ALU_FUNC),
         .ALU_OUT(ALU_OUT),
         .OUT_VALID(OUT_VALID)
